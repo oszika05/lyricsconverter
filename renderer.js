@@ -7,95 +7,10 @@
 //   - vertical responsiveness
 //   - ...
 
-function error (msg) {
-  document.querySelector('#messages').innerHTML +=
-    '<div class="row"><div class="alert alert-danger col-md-12" role="alert"><strong>Teringettét!</strong> '+ msg +'</div></div>';
-}
+const convert = require('./converter');
+const electron = require('electron');
 
-function checkDoc (doc) {
-  if (doc.getElementsByTagName('song').length === 0) {
-    error('Rossz formátum!');
-    return false;
-  }
-
-  let song = doc.getElementsByTagName('song')[0];
-
-  if (song.getElementsByTagName('title').length === 0) {
-    error('Nincs cím!');
-    return false;
-  }
-
-  if (song.getElementsByTagName('presentation').length === 0) {
-    error('Hiányzik a sorrend!');
-    return false;
-  }
-
-  if (doc.getElementsByTagName('lyrics').length === 0) {
-    error('Hiányzik a szöveg!');
-    return false;
-  }
-
-  return true;
-}
-
-function newParagraph(paragraphs, paragraph) {
-  return paragraphs.find(element => {
-    return element.name.trim() === paragraph.trim();
-  })['body'].split('\n')
-  .map(x => x.trim())
-  .join('\n').trim() + '\n\n\n';
-}
-
-function convert(input) {
-  let doc = new DOMParser().parseFromString(input, 'text/xml');
-
-  if (!checkDoc(doc)) return "";
-
-
-  let song = doc.getElementsByTagName('song')[0];
-
-  let title = song.getElementsByTagName('title')[0].innerHTML;
-  let order = song.getElementsByTagName('presentation')[0].innerHTML;
-
-  let lyrics = song.getElementsByTagName('lyrics')[0].innerHTML;
-
-  let paragraphs = lyrics.split(/\[(?=[\s\S]{1,10}\])/ig)
-  .filter(paragraph => {
-    return paragraph.length !== 0;
-  })
-  .map(paragraph => {
-    return paragraph.replace(/\|\|/g, '\n').replace(/\|/g, ' ');
-  })
-  .map(paragraph => {
-    let split = paragraph.split(']');
-    return {
-      name: split[0], // LOL
-      body: split[1]
-    }
-  });
-
-  console.log(paragraphs);
-
-
-  //console.log(JSON.stringify(arr, null, 2));
-  let body;
-
-  try {
-    let sequence = order.split(' ');
-    body = sequence.reduce(
-      (result, paragraph) => result  + newParagraph(paragraphs, paragraph),
-      title + '\n\n\n\n');
-  } catch (e) {
-    error('A versszak nem található!');
-    return "";
-  }
-
-
-
-  return body;
-}
-
-document.querySelector('#input').value = `<song><title>A mennyei tábor</title><author/><copyright/><hymn_number>77</hymn_number><presentation>V1 C V2 C V3 C</presentation><ccli/><capo print="false"/><key/><aka/><key_line/><user1/><user2/><user3/><theme/><tempo/><time_sig/><lyrics>[V1]
+document.querySelector('#input').value = `<?xml version="1.0" encoding="UTF-8"?><song><title>A mennyei tábor</title><author/><copyright/><hymn_number>77</hymn_number><presentation>V1 C V2 C V3 C</presentation><ccli/><capo print="false"/><key/><aka/><key_line/><user1/><user2/><user3/><theme/><tempo/><time_sig/><lyrics>[V1]
  A mennyei tábor ma mellettünk áll,
  a harcban a győztes az Úr!
  A gonoszság bástyája porba száll,
@@ -121,6 +36,17 @@ document.querySelector('#convertbutton').addEventListener('click',  () => {
   document.querySelector('#messages').innerHTML = "";
   let input = document.querySelector('#input').value;
   //console.log(input);
-  let output = convert(input);
+  let output = convert.toIVS(input);
   document.querySelector('#output').value = output;
 });
+
+
+
+document.querySelector('#fileInput').addEventListener('onchange',  () => {
+  console.log(document.querySelector('#fileInput').files);
+});
+
+
+
+const file = require('./file');
+file("./testSongs");
