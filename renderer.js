@@ -2,6 +2,7 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
+const ipc = require('electron').ipcRenderer
 
 // TODO:
 //   - vertical responsiveness
@@ -9,7 +10,9 @@
 
 const convert = require('./converter');
 const electron = require('electron');
+const file = require('./file');
 
+/*
 document.querySelector('#input').value = `<?xml version="1.0" encoding="UTF-8"?><song><title>A mennyei tábor</title><author/><copyright/><hymn_number>77</hymn_number><presentation>V1 C V2 C V3 C</presentation><ccli/><capo print="false"/><key/><aka/><key_line/><user1/><user2/><user3/><theme/><tempo/><time_sig/><lyrics>[V1]
  A mennyei tábor ma mellettünk áll,
  a harcban a győztes az Úr!
@@ -39,14 +42,19 @@ document.querySelector('#convertbutton').addEventListener('click',  () => {
   let output = convert.toIVS(input);
   document.querySelector('#output').value = output;
 });
+*/
 
 
-
-document.querySelector('#fileInput').addEventListener('onchange',  () => {
-  console.log(document.querySelector('#fileInput').files);
+document.querySelector('#fileInput').addEventListener('click',  () => {
+  ipc.send('open-file-dialog');
 });
 
+ipc.on('selected-directory', function (event, path) {
+  console.log(path);
+  file(path);
+})
 
 
-const file = require('./file');
-file("./testSongs");
+
+
+//file("./testSongs");
