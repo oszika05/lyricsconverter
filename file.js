@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const iconv = require('iconv-lite');
 const {promisify} = require('util');
-const util = require('util');
 
 const error = require('./error');
 const converter = require('./converter');
@@ -33,12 +32,8 @@ function readDirPromise(dir) {
 
 function openFiles(files) {
   files.forEach(file => {
-    console.log(file);
     if (file.startsWith('.')) return;
     fs.readFile(file, 'utf8', (error, data) => {
-
-
-      console.log(data);
 
       fs.writeFile(
         path.join(destinationDirectory, path.basename(file)) + ".ivs.txt",

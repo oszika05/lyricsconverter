@@ -1,5 +1,7 @@
 const error = require('./error');
 
+const MAX_LINE_WIDTH = 230; // TODO
+
 function checkDoc (doc) {
   if (doc.getElementsByTagName('song').length === 0) {
     error('Rossz formátum!');
@@ -39,18 +41,21 @@ function newParagraph(paragraphs, paragraph) {
   .join('\n').trim() + '\n\n\n'; // adding newlines to the end of the paragraph
 }
 
-function convert(input) {
+function convert(input, options) {
+  options = options || {};
+  if (!options.hasOwnProperty('longlonesplit')) options.longlinesplit = false;
+  if (!options.hasOwnProperty('autoorder')) options.autoorder = false;
+
   let doc = new DOMParser().parseFromString(input, 'text/xml');
 
-  if (!checkDoc(doc)) return "";
+  if (!checkDoc(doc)) return "Hiba";
 
 
   let song = doc.getElementsByTagName('song')[0];
-
   let title = song.getElementsByTagName('title')[0].innerHTML;
   let order = song.getElementsByTagName('presentation')[0].innerHTML;
-
   let lyrics = song.getElementsByTagName('lyrics')[0].innerHTML;
+
 
   let paragraphs = lyrics.split(/\[(?=[\s\S]{1,10}\])/ig)
   .filter(paragraph => { // filtering empty paragraphs
@@ -62,17 +67,25 @@ function convert(input) {
   .map(paragraph => { // extracting the paragraphs into an array
     let split = paragraph.split(']');
     return {
-      name: split[0], // LOL
-      body: split[1]
+      name: split[0],
+      body: split[1].split('\n').map(line => line.trim()).join('\n') // trimming the lines
     }
   });
 
-  //console.log(paragraphs);
+  // optional functions
 
+  // long line split
+  if(options.longlinesplit === true) {
+    let newParagraphs = require('./linesplit')(paragraphs);
+    if (newParagraphs.length !== paragraphs.length) {
+      paragraphs = 'Ez a fájl automatikusan tördelve lett.\n\n' + newParagraphs;
+    }
+  }
+  // automatic order
 
-  //console.log(JSON.stringify(arr, null, 2));
+  // maybe? multiplication
+
   let body;
-
   try {
     let sequence = order.split(' ');
     body = sequence.reduce( // putting the paragraphs into the right order
@@ -81,7 +94,7 @@ function convert(input) {
     );
   } catch (e) {
     error('A versszak nem található!');
-    return "";
+    return "Hiba"; // TODO
   }
 
 
