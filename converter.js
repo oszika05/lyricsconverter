@@ -26,12 +26,17 @@ function checkDoc (doc) {
   return true;
 }
 
+/**
+ * Finds the paragraph with a given name
+ */
 function newParagraph(paragraphs, paragraph) {
-  return paragraphs.find(element => {
+  return paragraphs
+  .find(element => { // the paragraph with the given name
     return element.name.trim() === paragraph.trim();
-  })['body'].split('\n')
-  .map(x => x.trim())
-  .join('\n').trim() + '\n\n\n';
+  })['body']
+  .split('\n')
+  .map(x => x.trim()) // trimming the lines
+  .join('\n').trim() + '\n\n\n'; // adding newlines to the end of the paragraph
 }
 
 function convert(input) {
@@ -48,13 +53,13 @@ function convert(input) {
   let lyrics = song.getElementsByTagName('lyrics')[0].innerHTML;
 
   let paragraphs = lyrics.split(/\[(?=[\s\S]{1,10}\])/ig)
-  .filter(paragraph => {
+  .filter(paragraph => { // filtering empty paragraphs
     return paragraph.length !== 0;
   })
-  .map(paragraph => {
+  .map(paragraph => { // replacing | and || to space and newline
     return paragraph.replace(/\|\|/g, '\n').replace(/\|/g, ' ');
   })
-  .map(paragraph => {
+  .map(paragraph => { // extracting the paragraphs into an array
     let split = paragraph.split(']');
     return {
       name: split[0], // LOL
@@ -62,7 +67,7 @@ function convert(input) {
     }
   });
 
-  console.log(paragraphs);
+  //console.log(paragraphs);
 
 
   //console.log(JSON.stringify(arr, null, 2));
@@ -70,9 +75,10 @@ function convert(input) {
 
   try {
     let sequence = order.split(' ');
-    body = sequence.reduce(
+    body = sequence.reduce( // putting the paragraphs into the right order
       (result, paragraph) => result  + newParagraph(paragraphs, paragraph),
-      title + '\n\n\n\n');
+      title + '\n\n\n\n'
+    );
   } catch (e) {
     error('A versszak nem található!');
     return "";
