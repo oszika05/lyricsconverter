@@ -45,13 +45,16 @@ document.querySelector('#convertbutton').addEventListener('click',  () => {
 */
 
 
-document.querySelector('#fileInput').addEventListener('click',  () => {
-  ipc.send('open-file-dialog');
+document.querySelector('#fileToIVS').addEventListener('click',  () => {
+  ipc.send('open-file-dialog', 'toIVS');
+});
+document.querySelector('#fileToOpenSong').addEventListener('click',  () => {
+  ipc.send('open-file-dialog', 'toOpenSong');
 });
 
-ipc.on('selected-directory', function (event, path) {
-  console.log(path);
-  file(path);
+ipc.on('selected-directory', function (event, path, mode) {
+  console.log('render' + mode);
+  file(path, mode);
 })
 
 

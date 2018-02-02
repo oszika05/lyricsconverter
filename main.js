@@ -62,10 +62,11 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-ipc.on('open-file-dialog', function (event) {
+ipc.on('open-file-dialog', function (event, mode) {
+  console.log('mainjs ' + mode);
   dialog.showOpenDialog({
     properties: ['openFile', 'openDirectory', 'multiSelections']
   }, function (files) {
-    if (files) event.sender.send('selected-directory', files)
+    if (files) event.sender.send('selected-directory', files, mode)
   })
 })
