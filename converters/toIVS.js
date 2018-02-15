@@ -32,13 +32,34 @@ function checkDoc (doc) {
  * Finds the paragraph with a given name
  */
 function newParagraph(paragraphs, paragraph) {
-  return paragraphs
+  let ret = paragraphs
   .find(element => { // the paragraph with the given name
     return element.name.trim() === paragraph.trim();
   })['body']
-  .split('\n')
-  .map(x => x.trim()) // trimming the lines
-  .join('\n').trim() + '\n\n\n'; // adding newlines to the end of the paragraph
+  .map(p => p.join('\n'))
+  .join('\n') + '\n\n\n'; // adding newlines to the end of the paragraph
+
+  console.log('2paragraph:\n|' + ret + '|');
+
+  return ret;
+}
+
+function createPairs(paragraph) {
+  let lines = paragraph.trim().split('\n');
+  let ret = []
+
+  for (let i = 0; i < lines.length - 1; i += 2) {
+    ret.push([
+      lines[i].trim(),
+      lines[i + 1].trim()
+    ]);
+  }
+
+  if (lines.length % 2 == 1) ret.push([lines[lines.length - 1].trim(), ''])
+
+  console.log(ret)
+
+  return ret;
 }
 
 function convert(title, input, options) {
@@ -68,10 +89,13 @@ function convert(title, input, options) {
   })
   .map(paragraph => { // extracting the paragraphs into an array
     let split = paragraph.split(']');
-    return {
+    let ret = {
       name: split[0],
-      body: split[1].split('\n').map(line => line.trim()).join('\n') // trimming the lines
+      body: createPairs(split[1])
     }
+    console.log('1paragraph:\n');
+    ret.body.forEach(x => x.forEach(y => console.log('.'+y)))
+    return ret;
   });
 
   // optional functions
@@ -91,7 +115,7 @@ function convert(title, input, options) {
   try {
     let sequence = order.split(' ');
     body = sequence.reduce( // putting the paragraphs into the right order
-      (result, paragraph) => result  + newParagraph(paragraphs, paragraph),
+      (result, paragraph) => result + newParagraph(paragraphs, paragraph),
       title + '\n\n\n\n'
     );
   } catch (e) {
@@ -99,7 +123,7 @@ function convert(title, input, options) {
     return "Hiba"; // TODO
   }
 
-
+  console.log(body);
 
   return body;
 }
